@@ -5,25 +5,23 @@ Python script which will talk to the STM32 bootloader to upload and download fir
 
 Original Version by: Ivan A-R <ivan@tuxotronic.org>
 
+Usage:
+    stm32loader list
+    stm32loader info COM3
+    stm32loader write COM3 file.bin [--erase] [--verify] [--run] [--go-addr 0x08000000]
+    stm32loader erase COM3 [--run] [--go-addr 0x08000000]
+    stm32loader read COM3 dump.bin --length 0x1000
 
-Usage: ./stm32loader.py [-hqVewvr] [-l length] [-p port] [-b baud] [-a addr] [file.bin]
-    -h          This help
-    -q          Quiet
-    -V          Verbose
-    -e          Erase
-    -w          Write
-    -v          Verify
-    -r          Read
-    -l length   Length of read
-    -p port     Serial port (default: /dev/tty.usbserial-ftCYPMYJ)
-    -b baud     Baud speed (default: 115200)
-    -a addr     Target address
-
-    ./stm32loader.py -e -w -v example/main.bin
-
+Options:
+    --run              Release/reset the chip after the operation so it runs normally.
+    --go-addr ADDR     Send the STM32 bootloader GO command to ADDR after the operation.
+    --address ADDR     Target flash address (default: 0x08000000).
+    --baud BAUD        Baud rate (default: 115200).
 
 Example:
-stm32loader.py -e -w -v somefile.bin
+stm32loader write COM3 somefile.bin --erase --verify --run
 
 This will pre-erase flash, write somefile.bin to the flash on the device, and then perform a verification after writing is finished.
 
+If your board stays in the ROM bootloader unless it is hardware-reset with BOOT0 low, use --run.
+If the MCU supports jumping directly from the bootloader, use --go-addr 0x08000000.

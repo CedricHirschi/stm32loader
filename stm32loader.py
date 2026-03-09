@@ -36,7 +36,7 @@ import time
 from enum import IntEnum
 
 import serial
-from progressbar import Bar, ETA, Percentage, ProgressBar
+from progressbar import ETA, Bar, Percentage, ProgressBar
 
 
 # these come from AN2606 Table 226
@@ -464,17 +464,21 @@ def main():
         type=auto_int,
         default=-1,
         metavar="ADDR",
-        help="Jump to address after operation (e.g. 0x08000000)",
+        help="Send the bootloader GO command to ADDR after operation",
     )
 
     parser = argparse.ArgumentParser(
         description="STM32 bootloader utility",
-        epilog="Example: %(prog)s write COM3 firmware.bin --erase --verify",
+        epilog=(
+            "Example: %(prog)s --run write COM3 firmware.bin --erase --verify"
+        ),
     )
     parser.add_argument("-q", "--quiet", action="store_true", help="Quiet mode")
     parser.add_argument("-V", "--verbose", action="store_true", help="Verbose mode")
     parser.add_argument(
-        "-g", "--go", action="store_true", help="Jump to address after operation"
+        "--run",
+        action="store_true",
+        help="Reset or release the chip to run after the operation",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -599,15 +603,19 @@ def main():
                 with open(args.file, "wb") as f:
                     f.write(bytes(rdata))
 
-        if args.go_addr != -1 and args.go:
-            cmd.cmdGo(args.go_addr)
-
     finally:
-        if args.go:
-            log.debug("Releasing chip to run...")
+        if args.go_addr != -1:
+            cmd.cmdGo(args.go_addr)
+            # cmdGo already jumped to application, just close the port without reset
+            cmd.sp.close()
+        elif args.run:
+            # --run without --go-addr: exit bootloader mode and reset to run normally
+            print("Releasing chip to run...")
             cmd.releaseChip()
         else:
             cmd.sp.close()
+
+    print("Done.")
 
 
 if __name__ == "__main__":
