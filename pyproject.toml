@@ -1,0 +1,16 @@
+[project]
+name = "stm32loader"
+version = "0.1.0"
+description = "Python script which will talk to the STM32 bootloader to upload and download firmware"
+requires-python = ">=3.6"
+dependencies = [
+    "progressbar2>=3.55.0",
+    "pyserial>=3.5",
+]
+
+[project.scripts]
+stm32loader = "stm32loader:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
